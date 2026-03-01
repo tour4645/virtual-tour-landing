@@ -476,36 +476,62 @@
                 const group = new THREE.Group();
                 const data = equipmentData[index];
 
-                // Create "Rack" look for PLC
-                const rackGeo = new THREE.BoxGeometry(2, 4, 0.5);
-                const rackMat = new THREE.MeshPhongMaterial({ color: 0x1a202c });
-                const rack = new THREE.Mesh(rackGeo, rackMat);
-                rack.position.z = -0.5;
-                group.add(rack);
+                // --- Main Body (Schneider Dark Gray) ---
+                const bodyGeo = new THREE.BoxGeometry(2.2, 2.5, 1.2);
+                const bodyMat = new THREE.MeshPhongMaterial({ color: 0x2d3436, shininess: 100 });
+                const body = new THREE.Mesh(bodyGeo, bodyMat);
+                group.add(body);
+                interObjects.push(body); // Make main body clickable too
+                body.userData = { name: data.name, desc: "Industrial Logic Controller - High Precision Model" };
 
+                // --- Terminal Blocks (Top & Bottom) ---
+                const termGeo = new THREE.BoxGeometry(2.0, 0.4, 0.4);
+                const termMat = new THREE.MeshPhongMaterial({ color: 0x1e272e });
+
+                const topTerm = new THREE.Mesh(termGeo, termMat);
+                topTerm.position.set(0, 1.2, 0.4);
+                body.add(topTerm);
+
+                const botTerm = new THREE.Mesh(termGeo, termMat);
+                botTerm.position.set(0, -1.2, 0.4);
+                body.add(botTerm);
+
+                // --- Ethernet Port (RJ45 Inset) ---
+                const portGeo = new THREE.BoxGeometry(0.4, 0.4, 0.1);
+                const portMat = new THREE.MeshPhongMaterial({ color: 0x000000 });
+                const port = new THREE.Mesh(portGeo, portMat);
+                port.position.set(-0.5, -0.2, 0.6);
+                body.add(port);
+
+                // Internal port glow for "Active" feel
+                const portLight = new THREE.PointLight(0x00f3ff, 0.5, 1);
+                portLight.position.set(-0.5, -0.2, 0.65);
+                body.add(portLight);
+
+                // --- Modules / Sub-components (Clickable) ---
                 data.parts.forEach((p, i) => {
-                    const geometry = new THREE.BoxGeometry(1.8, 1, 0.8);
-                    const material = new THREE.MeshPhongMaterial({
+                    const modGeo = new THREE.BoxGeometry(0.8, 0.8, 0.2);
+                    const modMat = new THREE.MeshPhongMaterial({
                         color: p.color,
                         transparent: true,
-                        opacity: 0.9,
+                        opacity: 0.8,
                         emissive: p.color,
-                        emissiveIntensity: 0.1
+                        emissiveIntensity: 0.2
                     });
-                    const module = new THREE.Mesh(geometry, material);
-                    module.position.y = 1.2 - (i * 1.2);
+                    const module = new THREE.Mesh(modGeo, modMat);
+
+                    // Position modules on the front face
+                    module.position.set(0.5, 0.6 - (i * 0.7), 0.61);
                     module.userData = p;
-                    group.add(module);
+                    body.add(module);
                     interObjects.push(module);
 
-                    // Add small lights/detail
-                    const ledGeo = new THREE.SphereGeometry(0.05);
+                    // LED detail
+                    const ledGeo = new THREE.SphereGeometry(0.04);
                     const ledMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
                     const led = new THREE.Mesh(ledGeo, ledMat);
-                    led.position.set(0.7, 0.3, 0.41);
+                    led.position.set(0.3, 0.3, 0.11);
                     module.add(led);
-
-                    module.baseY = module.position.y;
                 });
 
                 currentObject = group;
