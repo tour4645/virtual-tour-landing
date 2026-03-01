@@ -342,40 +342,198 @@
 
         <!-- 3D Showcase Section -->
         <section id="showcase" class="reveal">
-            <h2 class="h2-title">3D High-Fidelity Assets</h2>
+            <h2 class="h2-title">Interactive Training Core</h2>
             <p class="desc-text">
-                หัวใจของการสร้างโลกเสมือนคือโมเดล 3 มิติที่สมจริง เราออกแบบและพัฒนา Asset ทุกชิ้นด้วยความละเอียดสูง
-                เพื่อให้รองรับทั้งการแสดงผลใน VR และการวางซ้อนในโลกจริงผ่าน AR
+                จำลองการ "ส่อง" ดูอุปกรณ์จริงผ่านระบบ Interactive 3D.
+                คลิกที่ส่วนประกอบเพื่อดูข้อมูลทางเทคนิค หรือสลับอุปกรณ์เพื่อศึกษาชุดฝึกอื่นๆ
             </p>
 
-            <div class="project-list"
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-                <div class="glass-card" style="padding: 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🏗️</div>
-                    <h3 style="margin-bottom: 1rem;">Industrial Training Kit</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-dim);">
-                        โมเดลชุดฝึกฝนเครื่องจักรกลหนักที่ถูกถอดแบบจากอุปกรณ์จริง 1:1
-                        พร้อมระบบ Animation เพื่อแสดงขั้นตอนการทำงานที่ซับซ้อน
-                    </p>
+            <div class="glass-card"
+                style="padding: 1rem; position: relative; height: 600px; display: flex; flex-direction: column;">
+                <!-- 3D Viewer Container -->
+                <div id="three-container"
+                    style="flex: 1; width: 100%; border-radius: 12px; overflow: hidden; background: #000;"></div>
+
+                <!-- Info Overlay -->
+                <div id="part-info"
+                    style="position: absolute; top: 30px; left: 30px; max-width: 300px; pointer-events: none; opacity: 0; transition: 0.5s;">
+                    <div class="badge" id="part-name"
+                        style="margin-bottom: 0.5rem; background: var(--accent); color: #000;">PART NAME</div>
+                    <div class="glass-card" style="padding: 1.5rem; backdrop-filter: blur(5px);">
+                        <p id="part-desc" style="font-size: 0.9rem; color: #fff;">Technical description goes here...</p>
+                    </div>
                 </div>
-                <div class="glass-card" style="padding: 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚙️</div>
-                    <h3 style="margin-bottom: 1rem;">Exploded View Models</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-dim);">
-                        การจำลองการแยกชิ้นส่วนเครื่องยนต์แบบสามมิติ (Exploded View)
-                        ช่วยให้ผู้เรียนสามารถศึกษากลไกภายในได้อย่างละเอียดทุกซอกทุกมุม
-                    </p>
+
+                <!-- Controls -->
+                <div
+                    style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 1rem; z-index: 10;">
+                    <button onclick="switchEquipment(0)" class="tag"
+                        style="cursor: pointer; border: 1px solid var(--accent); color: var(--accent);">ชุดฝึก A:
+                        ระบบขับเคลื่อน</button>
+                    <button onclick="switchEquipment(1)" class="tag"
+                        style="cursor: pointer; border: 1px solid var(--primary); color: var(--primary);">ชุดฝึก B:
+                        ระบบเซนเซอร์</button>
+                    <button onclick="switchEquipment(2)" class="tag"
+                        style="cursor: pointer; border: 1px solid var(--gold); color: var(--gold);">ชุดฝึก C:
+                        คอนโทรลเลอร์</button>
                 </div>
-                <div class="glass-card" style="padding: 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🛰️</div>
-                    <h3 style="margin-bottom: 1rem;">Interactive AR Sprites</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-dim);">
-                        UI และโมเดลขนาดเล็กที่ตอบสนองต่อการสัมผัส (Hand Tracking)
-                        เพื่อสร้างประสบการณ์ Spatial Computing ที่แท้จริง
-                    </p>
+
+                <!-- Interaction Hint -->
+                <div style="position: absolute; top: 20px; right: 20px; font-size: 0.8rem; color: var(--text-dim);">
+                    🖱️ เลื่อนเพื่อหมุน | 🔍 สกรูวเพื่อซูม | 👆 คลิกเพื่อดูข้อมูล
                 </div>
             </div>
         </section>
+
+        <!-- Three.js Integration -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script>
+            let scene, camera, renderer, raycaster, mouse;
+            let currentObject;
+            let interObjects = [];
+
+            const infoBox = document.getElementById('part-info');
+            const partName = document.getElementById('part-name');
+            const partDesc = document.getElementById('part-desc');
+
+            const equipmentData = [
+                {
+                    name: "ระบบขับเคลื่อน (Drive System)",
+                    parts: [
+                        { name: "Motor Core", color: 0x00f3ff, desc: "มอเตอร์ประสิทธิภาพสูง ควบคุมด้วยระบบ PWM เพื่อความแม่นยำในการหมุน" },
+                        { name: "Gear Box", color: 0x7000ff, desc: "ระบบเฟืองทดกำลัง 1:50 เพิ่มแรงบิดสำหรับการยกโหลดหนัก" },
+                        { name: "Power Rail", color: 0x9ca3af, desc: "รางจ่ายไฟหลัก รองรับกระแสสูงสุด 20A พร้อมระบบตัดไฟอัตโนมัติ" }
+                    ]
+                },
+                {
+                    name: "ระบบเซนเซอร์ (Sensor Array)",
+                    parts: [
+                        { name: "LiDAR Scanner", color: 0xff0055, desc: "เซนเซอร์ตรวจจับระยะไกล 360 องศา เพื่อการสร้างแผนที่ Virtual Room" },
+                        { name: "Ultrasonic Kit", color: 0x00ff00, desc: "เครื่องตรวจจับสิ่งกีดขวางระยะใกล้ ทำงานร่วมกับระบบ AR Overlay" },
+                        { name: "IMU Unit", color: 0xffff00, desc: "วัดความเร่งและความเอียง เพื่อคงสถานะสมดุลของชุดฝึกในโลกจริง" }
+                    ]
+                },
+                {
+                    name: "คอนโทรลเลอร์ (Quantum Controller)",
+                    parts: [
+                        { name: "Main Logic Board", color: 0x0000ff, desc: "หน่วยประมวลผลหลัก ทำหน้าที่เชื่อมโยงโค้ด C# เข้ากับฮาร์ดแวร์" },
+                        { name: "WiFi/MQTT Module", color: 0xffffff, desc: "สื่อสารแบบไร้สายกับ Dashboard เพื่อส่งค่า Telemetry แบบ Real-time" },
+                        { name: "Cooling Fin", color: 0x444444, desc: "ระบบระบายความร้อนอลูมิเนียม ช่วยรักษาอุณหภูมิของชิปประมวลผล" }
+                    ]
+                }
+            ];
+
+            function initThree() {
+                const container = document.getElementById('three-container');
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                container.appendChild(renderer.domElement);
+
+                raycaster = new THREE.Raycaster();
+                mouse = new THREE.Vector2();
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                scene.add(ambientLight);
+
+                const pointLight = new THREE.PointLight(0xffffff, 1);
+                pointLight.position.set(10, 10, 10);
+                scene.add(pointLight);
+
+                camera.position.z = 5;
+                camera.position.y = 2;
+                camera.lookAt(0, 0, 0);
+
+                switchEquipment(0);
+                animateThree();
+
+                container.addEventListener('mousemove', onMouseMove);
+                container.addEventListener('click', onClick);
+                window.addEventListener('resize', onWindowResize);
+            }
+
+            function switchEquipment(index) {
+                // Clear previous objects
+                if (currentObject) scene.remove(currentObject);
+                interObjects = [];
+                infoBox.style.opacity = 0;
+
+                const group = new THREE.Group();
+                const data = equipmentData[index];
+
+                data.parts.forEach((p, i) => {
+                    const geometry = new THREE.BoxGeometry(1.5, 0.8, 1.5);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: p.color,
+                        transparent: true,
+                        opacity: 0.8,
+                        emissive: p.color,
+                        emissiveIntensity: 0.2
+                    });
+                    const cube = new THREE.Mesh(geometry, material);
+                    cube.position.y = i * 1.2 - 1;
+                    cube.userData = p;
+                    group.add(cube);
+                    interObjects.push(cube);
+
+                    // Add dynamic floating animation
+                    cube.baseY = cube.position.y;
+                });
+
+                currentObject = group;
+                scene.add(group);
+            }
+
+            function onMouseMove(event) {
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            }
+
+            function onClick() {
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(interObjects);
+
+                if (intersects.length > 0) {
+                    const obj = intersects[0].object;
+                    partName.innerText = obj.userData.name;
+                    partDesc.innerText = obj.userData.desc;
+                    infoBox.style.opacity = 1;
+
+                    // Highlight effect
+                    interObjects.forEach(o => o.material.emissiveIntensity = 0.2);
+                    obj.material.emissiveIntensity = 1;
+                } else {
+                    infoBox.style.opacity = 0;
+                    interObjects.forEach(o => o.material.emissiveIntensity = 0.2);
+                }
+            }
+
+            function animateThree() {
+                requestAnimationFrame(animateThree);
+
+                if (currentObject) {
+                    currentObject.rotation.y += 0.005;
+
+                    interObjects.forEach((obj, i) => {
+                        obj.position.y = obj.baseY + Math.sin(Date.now() * 0.002 + i) * 0.1;
+                    });
+                }
+
+                renderer.render(scene, camera);
+            }
+
+            function onWindowResize() {
+                const container = document.getElementById('three-container');
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+
+            // Init after DOM loaded
+            setTimeout(initThree, 500);
+        </script>
 
         <!-- AI Feature Section -->
         <section id="ai" class="ai-section reveal">
