@@ -365,17 +365,17 @@
                 </div>
 
                 <!-- Controls -->
-                <div
+                <div <div
                     style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 1rem; z-index: 10;">
                     <button onclick="switchEquipment(0)" class="tag"
-                        style="cursor: pointer; border: 1px solid var(--accent); color: var(--accent);">ชุดฝึก A:
-                        ระบบขับเคลื่อน</button>
+                        style="cursor: pointer; border: 1px solid var(--accent); color: var(--accent);">PLC Center:
+                        CPU</button>
                     <button onclick="switchEquipment(1)" class="tag"
-                        style="cursor: pointer; border: 1px solid var(--primary); color: var(--primary);">ชุดฝึก B:
-                        ระบบเซนเซอร์</button>
+                        style="cursor: pointer; border: 1px solid var(--primary); color: var(--primary);">PLC: I/O
+                        Module</button>
                     <button onclick="switchEquipment(2)" class="tag"
-                        style="cursor: pointer; border: 1px solid var(--gold); color: var(--gold);">ชุดฝึก C:
-                        คอนโทรลเลอร์</button>
+                        style="cursor: pointer; border: 1px solid var(--gold); color: var(--gold);">PLC: Network
+                        Supply</button>
                 </div>
 
                 <!-- Interaction Hint -->
@@ -398,27 +398,27 @@
 
             const equipmentData = [
                 {
-                    name: "ระบบขับเคลื่อน (Drive System)",
+                    name: "ชุดฝึก PLC: Core Controller",
                     parts: [
-                        { name: "Motor Core", color: 0x00f3ff, desc: "มอเตอร์ประสิทธิภาพสูง ควบคุมด้วยระบบ PWM เพื่อความแม่นยำในการหมุน" },
-                        { name: "Gear Box", color: 0x7000ff, desc: "ระบบเฟืองทดกำลัง 1:50 เพิ่มแรงบิดสำหรับการยกโหลดหนัก" },
-                        { name: "Power Rail", color: 0x9ca3af, desc: "รางจ่ายไฟหลัก รองรับกระแสสูงสุด 20A พร้อมระบบตัดไฟอัตโนมัติ" }
+                        { name: "CPU Module (S7-1200)", color: 0x2d3748, desc: "หน่วยประมวลผลหลักของ PLC ทำหน้าที่คุมตรรกะการทำงาน (Logic) ทั้งหมดของชุดฝึก" },
+                        { name: "Digital I/O Ports", color: 0x4a5568, desc: "ช่องเชื่อมต่อสัญญาณ Digital Input/Output สำหรับต่อกับ Sensor และ Actuator ภายนอก" },
+                        { name: "Ethernet Interface", color: 0x00f3ff, desc: "พอร์ตสื่อสารความเร็วสูงสำหรับโปรแกรม PLC และเชื่อมต่อกับระบบ AI Monitoring" }
                     ]
                 },
                 {
-                    name: "ระบบเซนเซอร์ (Sensor Array)",
+                    name: "ชุดฝึก PLC: I/O Expansion",
                     parts: [
-                        { name: "LiDAR Scanner", color: 0xff0055, desc: "เซนเซอร์ตรวจจับระยะไกล 360 องศา เพื่อการสร้างแผนที่ Virtual Room" },
-                        { name: "Ultrasonic Kit", color: 0x00ff00, desc: "เครื่องตรวจจับสิ่งกีดขวางระยะใกล้ ทำงานร่วมกับระบบ AR Overlay" },
-                        { name: "IMU Unit", color: 0xffff00, desc: "วัดความเร่งและความเอียง เพื่อคงสถานะสมดุลของชุดฝึกในโลกจริง" }
+                        { name: "Analog Input Module", color: 0x7000ff, desc: "โมเดลรับสัญญาณอนาล็อก 4-20mA หรือ 0-10V สำหรับเซนเซอร์ความดันและอุณหภูมิ" },
+                        { name: "Relay Output Board", color: 0xfacc15, desc: "แผงรีเลย์สำหรับควบคุมอุปกรณ์ไฟฟ้ากำลังสูงในโรงงานจำลอง" },
+                        { name: "Signal Indicator", color: 0x00ff00, desc: "ไฟแสดงสถานะการทำงานของ Logic แต่ละ Step ในกระบวนการ AR Animation" }
                     ]
                 },
                 {
-                    name: "คอนโทรลเลอร์ (Quantum Controller)",
+                    name: "ชุดฝึก PLC: Power & Network",
                     parts: [
-                        { name: "Main Logic Board", color: 0x0000ff, desc: "หน่วยประมวลผลหลัก ทำหน้าที่เชื่อมโยงโค้ด C# เข้ากับฮาร์ดแวร์" },
-                        { name: "WiFi/MQTT Module", color: 0xffffff, desc: "สื่อสารแบบไร้สายกับ Dashboard เพื่อส่งค่า Telemetry แบบ Real-time" },
-                        { name: "Cooling Fin", color: 0x444444, desc: "ระบบระบายความร้อนอลูมิเนียม ช่วยรักษาอุณหภูมิของชิปประมวลผล" }
+                        { name: "24V DC Power Supply", color: 0x9ca3af, desc: "แหล่งจ่ายไฟหลักสำหรับ PLC และเซนเซอร์ทั้งหมดในชุดฝึก" },
+                        { name: "HMI Touch Panel", color: 0x3b82f6, desc: "หน้าจอสัมผัสสำหรับควบคุมเครื่องจักรในรูปแบบ Virtual Interface" },
+                        { name: "Profinet Module", color: 0xff0000, desc: "โมดูลสื่อสารเครือข่ายอุตสาหกรรมสำหรับการทำงานร่วมกับแขนกล 3D" }
                     ]
                 }
             ];
@@ -441,7 +441,7 @@
                 pointLight.position.set(10, 10, 10);
                 scene.add(pointLight);
 
-                camera.position.z = 5;
+                camera.position.z = 6;
                 camera.position.y = 2;
                 camera.lookAt(0, 0, 0);
 
@@ -462,23 +462,36 @@
                 const group = new THREE.Group();
                 const data = equipmentData[index];
 
+                // Create "Rack" look for PLC
+                const rackGeo = new THREE.BoxGeometry(2, 4, 0.5);
+                const rackMat = new THREE.MeshPhongMaterial({ color: 0x1a202c });
+                const rack = new THREE.Mesh(rackGeo, rackMat);
+                rack.position.z = -0.5;
+                group.add(rack);
+
                 data.parts.forEach((p, i) => {
-                    const geometry = new THREE.BoxGeometry(1.5, 0.8, 1.5);
+                    const geometry = new THREE.BoxGeometry(1.8, 1, 0.8);
                     const material = new THREE.MeshPhongMaterial({
                         color: p.color,
                         transparent: true,
-                        opacity: 0.8,
+                        opacity: 0.9,
                         emissive: p.color,
-                        emissiveIntensity: 0.2
+                        emissiveIntensity: 0.1
                     });
-                    const cube = new THREE.Mesh(geometry, material);
-                    cube.position.y = i * 1.2 - 1;
-                    cube.userData = p;
-                    group.add(cube);
-                    interObjects.push(cube);
+                    const module = new THREE.Mesh(geometry, material);
+                    module.position.y = 1.2 - (i * 1.2);
+                    module.userData = p;
+                    group.add(module);
+                    interObjects.push(module);
 
-                    // Add dynamic floating animation
-                    cube.baseY = cube.position.y;
+                    // Add small lights/detail
+                    const ledGeo = new THREE.SphereGeometry(0.05);
+                    const ledMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                    const led = new THREE.Mesh(ledGeo, ledMat);
+                    led.position.set(0.7, 0.3, 0.41);
+                    module.add(led);
+
+                    module.baseY = module.position.y;
                 });
 
                 currentObject = group;
